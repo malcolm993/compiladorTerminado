@@ -1,0 +1,31 @@
+const MIN = -1000, max=1000;
+
+var A,B,C,W,X,Y,Z;
+
+procedure MOSTRAR;
+begin
+ IF Y = 0 THEN WRITELN ('HAY UNA RAIZ EN X=', X);
+ W :=1
+end;
+
+begin
+ WRITELN;
+ WRITELN ('PROGRAMA PARA BUSCAR RAICES ENTERAS DE ECUACIONES CUADRATICAS');
+ WRITELN ;
+ WRITELN ('   2');
+ WRITELN ('A X + B X + C = 0');
+ WRITELN;
+ write ( ' ingrese A : '); readLn (A);
+ write ( ' ingrese B : '); readLn (b);
+ write ( ' ingrese C : '); readLn (c); 
+ x := min;
+ W := 0;
+ while x <= max do 
+  begin 
+   z := x - 1;
+   y := a * sqr(z+1) + B * x + c;
+   if y = 0 then call MOSTRAR;
+   x := x + 1
+  end;
+ if W = 0 then writeln ('NO HAY RAICES ENTERAS ENTRE ', MIN,' Y ', MAX)
+end.
