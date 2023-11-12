@@ -590,6 +590,27 @@ public class AnalizadorSintactico {
                 //System.out.println("Se codifico correctamente el halt");
                 intentoMaravilla();
                 break;
+                
+            case SUCC:
+                intentoMaravilla();
+                if (alex.getSimbolo() == Terminal.APERTURA_PARENTESIS){
+                    expresion(base, desplazamiento);
+                }else{
+                    indError.mostrarError(11, alex.getCadena());
+                }
+                if (alex.getSimbolo() == Terminal.CIERRE_PARENTESIS) {
+                    intentoMaravilla();
+                } else {
+                    indError.mostrarError(12, alex.getCadena());
+                }
+                genCod.cargarByte(0x5B);
+                genCod.cargarByte(0xB8);
+                genCod.cargarInt(1);
+                genCod.cargarByte(0x01);
+                genCod.cargarByte(0xD8);
+                
+                
+                break;
         }
     }
 
@@ -922,6 +943,8 @@ public class AnalizadorSintactico {
                 genCod.cargarByte(0xE8); // IMUL EAX, EBX
                 genCod.cargarByte(0x50); // PONEMOS EL VALOR EN LA PILA CON PUSH EAX
                 break;
+                
+                
             default:
                 indError.mostrarError(20, alex.getCadena());
         }
