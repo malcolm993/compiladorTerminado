@@ -190,6 +190,7 @@ public class AnalizadorLexico {
         palabrasReservadas.add("write");
         palabrasReservadas.add("not");
         palabrasReservadas.add("halt");
+        palabrasReservadas.add("sqr");
     }
 
     private boolean caracterEstaVacio() {
@@ -242,6 +243,8 @@ public class AnalizadorLexico {
             terminalAux = Terminal.NOT;
         } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(15))) {
             terminalAux = Terminal.HALT;
+        } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(16))) {
+            terminalAux = Terminal.SQR;
         }
 
         return terminalAux;
@@ -250,5 +253,5 @@ public class AnalizadorLexico {
     public String getNombreArchivo() {
         return nombreArchivo;
     }
-    
+
 }

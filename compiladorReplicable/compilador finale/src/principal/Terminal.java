@@ -38,6 +38,7 @@ public enum Terminal {
     READLN,
     WRITE,
     NOT,
-    HALT;
+    HALT,
+    SQR;
 
 }

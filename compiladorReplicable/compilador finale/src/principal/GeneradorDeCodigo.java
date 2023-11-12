@@ -21,48 +21,48 @@ public class GeneradorDeCodigo {
         TAMANO_HEADER = 512;
     }
 
-    public void finalizarMemoria(int cantidadDeVariables, String nombreArchivo)throws FileNotFoundException, IOException {
+    public void finalizarMemoria(int cantidadDeVariables, String nombreArchivo) throws FileNotFoundException, IOException {
         int distancia = 1416 - (topeMemoria + 5); // +5 PORQUE ES ANTES DEL E9
-            cargarByte(0xE9);  // E9 00 00 00 00
-            cargarInt(distancia);// SALTO INCONDICIONAL A LA RUTINA DE SALIDA
+        cargarByte(0xE9);  // E9 00 00 00 00
+        cargarInt(distancia);// SALTO INCONDICIONAL A LA RUTINA DE SALIDA
 
-            // IMAGE BASE + BASE OF CODE + TOPE MEMORIA - HEADER SIZE
-            int direccionInicioDeVariables
-                    = descargarIntDe(204) + descargarIntDe(212) + topeMemoria - TAMANO_HEADER;
-            cargarIntEn(direccionInicioDeVariables, 1793);
+        // IMAGE BASE + BASE OF CODE + TOPE MEMORIA - HEADER SIZE
+        int direccionInicioDeVariables
+                = descargarIntDe(204) + descargarIntDe(212) + topeMemoria - TAMANO_HEADER;
+        cargarIntEn(direccionInicioDeVariables, 1793);
 
-            for (int i = 0; i < cantidadDeVariables; i++) {
-                cargarInt(0);
-            }
+        for (int i = 0; i < cantidadDeVariables; i++) {
+            cargarInt(0);
+        }
 
-            cargarIntEn(topeMemoria - TAMANO_HEADER, 416); //TOPE MEMORIA - EL TAMAÑO DEL HEADER
-            // DESPUÉS HAY QUE RELLENAR EL ARCHIVO CON 0s HASTA QUE SEA MULTIPLO DEL ENTERO QUE SE ENCUENTRA EN LOS BYTES 216 A 219
-            int fileAlignment = descargarIntDe(220);
-            while (topeMemoria % fileAlignment != 0) {
-                cargarByte(0x00);
-            }
+        cargarIntEn(topeMemoria - TAMANO_HEADER, 416); //TOPE MEMORIA - EL TAMAÑO DEL HEADER
+        // DESPUÉS HAY QUE RELLENAR EL ARCHIVO CON 0s HASTA QUE SEA MULTIPLO DEL ENTERO QUE SE ENCUENTRA EN LOS BYTES 216 A 219
+        int fileAlignment = descargarIntDe(220);
+        while (topeMemoria % fileAlignment != 0) {
+            cargarByte(0x00);
+        }
 
-            int tamanoSeccionText = topeMemoria - TAMANO_HEADER;
-            cargarIntEn(tamanoSeccionText, 188); //sizeOfCodeSection
-            cargarIntEn(tamanoSeccionText, 424); //sizeOfRawData
+        int tamanoSeccionText = topeMemoria - TAMANO_HEADER;
+        cargarIntEn(tamanoSeccionText, 188); //sizeOfCodeSection
+        cargarIntEn(tamanoSeccionText, 424); //sizeOfRawData
 
-            int sectionAlignment = descargarIntDe(216);
-            cargarIntEn(((2 + tamanoSeccionText / sectionAlignment) * sectionAlignment), 240); //sizeOfImage
-            cargarIntEn(((2 + tamanoSeccionText / sectionAlignment) * sectionAlignment), 208); //baseOfData
-            
-            generarArchivo(nombreArchivo);
+        int sectionAlignment = descargarIntDe(216);
+        cargarIntEn(((2 + tamanoSeccionText / sectionAlignment) * sectionAlignment), 240); //sizeOfImage
+        cargarIntEn(((2 + tamanoSeccionText / sectionAlignment) * sectionAlignment), 208); //baseOfData
+
+        generarArchivo(nombreArchivo);
 
     }
-    
-    private void generarArchivo(String nombreArchivo) throws FileNotFoundException, IOException{
-        String nombreArchivoExe = nombreArchivo.substring(0, nombreArchivo.length()-4);
+
+    private void generarArchivo(String nombreArchivo) throws FileNotFoundException, IOException {
+        String nombreArchivoExe = nombreArchivo.substring(0, nombreArchivo.length() - 4);
         nombreArchivoExe = nombreArchivoExe.concat(".exe");
         FileOutputStream fos = new FileOutputStream(nombreArchivoExe);
-        
-        for(int i = 0; i < topeMemoria; i++){
+
+        for (int i = 0; i < topeMemoria; i++) {
             fos.write(memoria[i]);
         }
-        
+
         fos.close();
     }
 

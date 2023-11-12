@@ -62,7 +62,7 @@ public class IndicadorError {
             /*case 15:
                 System.out.println("Se esperaba un NUMERO y se encontro: " + cadena);
                 break;*/
-            /*case 16:
+ /*case 16:
                 System.out.println("Se esperaba un PUNTO_Y_COMA y se encontro: " + cadena);
                 break;*/
             case 17:

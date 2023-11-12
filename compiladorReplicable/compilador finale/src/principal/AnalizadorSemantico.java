@@ -27,8 +27,8 @@ public class AnalizadorSemantico {
         ident = ident.toUpperCase();
         //System.out.println("======= ESTAMOS EN EL BUSCAR BEAN =======");
         while (i >= hasta) {
-                //System.out.println(identificadores[i].getNombre().toUpperCase());
-                //System.out.println(ident);
+            //System.out.println(identificadores[i].getNombre().toUpperCase());
+            //System.out.println(ident);
             if ((identificadores[i].getNombre().toUpperCase().equals(ident))) {
                 return i;
             }

@@ -91,7 +91,7 @@ public class AnalizadorSintactico {
                 } else {
                     indError.mostrarError(5, alex.getCadena());
                 }
-            }else if (alex.getSimbolo() == Terminal.NUMERO) {
+            } else if (alex.getSimbolo() == Terminal.NUMERO) {
                 beanConstante.setValor(Integer.parseInt(alex.getCadena()));
 
                 indice = aSem.buscarBean(base + desplazamiento - 1, base, beanConstante.getNombre());
@@ -101,7 +101,7 @@ public class AnalizadorSintactico {
                 } else {
                     indError.mostrarError(23, alex.getCadena());
                 }
-                
+
                 intentoMaravilla();
             } else {
                 indError.mostrarError(5, alex.getCadena());
@@ -246,7 +246,7 @@ public class AnalizadorSintactico {
         switch (alex.getSimbolo()) {
             case IDENTIFICADOR:
                 indice = aSem.buscarBean(base + desplazamiento - 1, 0, alex.getCadena());
-                
+
                 IdentificadorBean ident = aSem.obtenerBean(indice);
                 if (indice == -1) {
                     indError.mostrarError(24, alex.getCadena());
@@ -302,10 +302,10 @@ public class AnalizadorSintactico {
                 break;
             case IF:
                 intentoMaravilla();
-                if(alex.getSimbolo() == Terminal.NOT){
+                if (alex.getSimbolo() == Terminal.NOT) {
                     intentoMaravilla();
                     condicionNOT(base, desplazamiento);
-                }else{
+                } else {
                     condicion(base, desplazamiento);
                 }
                 int posicion = genCod.getTopeMemoria();
@@ -719,11 +719,11 @@ public class AnalizadorSintactico {
             genCod.cargarInt(0);       // E9 00 00 00 00
         }
     }
-    
+
     private void condicionNOT(int base, int desplazamiento) throws IOException {
-        if(alex.getSimbolo() == Terminal.APERTURA_PARENTESIS){
+        if (alex.getSimbolo() == Terminal.APERTURA_PARENTESIS) {
             intentoMaravilla();
-        } else{
+        } else {
             indError.mostrarError(11, alex.getCadena());
         }
         if (alex.getSimbolo() == Terminal.ODD) {
@@ -803,10 +803,10 @@ public class AnalizadorSintactico {
                 default:
                     indError.mostrarError(19, alex.getCadena());
             }
-            
-            if(alex.getSimbolo() == Terminal.CIERRE_PARENTESIS){
+
+            if (alex.getSimbolo() == Terminal.CIERRE_PARENTESIS) {
                 intentoMaravilla();
-            }else{
+            } else {
                 indError.mostrarError(22, alex.getCadena());
             }
             genCod.cargarByte(0xE9); // E9 00 00 00 00
@@ -889,6 +889,38 @@ public class AnalizadorSintactico {
                 } else {
                     indError.mostrarError(22, alex.getCadena());
                 }
+                break;
+            case SQR:
+                intentoMaravilla();
+                if (alex.getSimbolo() == Terminal.APERTURA_PARENTESIS) {
+                    intentoMaravilla();
+                } else {
+                    indError.mostrarError(11, alex.getCadena());
+                }
+                expresion(base, desplazamiento); // dejas en el tope de la pila el valor del registro EAX
+
+                if (alex.getSimbolo() == Terminal.CIERRE_PARENTESIS) {
+                    intentoMaravilla();
+                } else {
+                    indError.mostrarError(12, alex.getCadena());
+                }
+
+                // LEVANTAMOS EL VALOR DE LA PILA
+                // QUEREMOS UN NUMERO AL CUADRADO
+                // ESO SIGNIFICA N X N, 2X2
+                // ENTONCES QUEREMOS MULTIPLICAR EL MISMO VALOR POR EL MISMO VALOR
+                // PARA ELLO PODEMOS USAR IMUL QUE MULTIPLICA EAX POR EBX
+                // PARA ELLO NECESITAMOS TENER EL MISMO VALOR EN EAX Y EN EBX
+                //genCod.cargarByte(0x58); // POP EAX
+                //genCod.cargarByte(0x93); // XCHG EAX, EBX así pasamos el valor levantado de la pila y lo ponemos en ebx
+                genCod.cargarByte(0x5B); // POP EBX
+                genCod.cargarByte(0xB8); // YA CON EL VALOR EN EBX FORZAMOS A EAX A QUE SEA 0
+                genCod.cargarInt(0);       // B8 00 00 00 00 es MOV EAX, 00 00 00 00  
+                genCod.cargarByte(0x01); // 01 D8 SUMA EAX Y EBX Y LO PONE EN EL PRIMER OPERANDO 
+                genCod.cargarByte(0xD8); // ENTONCES EAX + EBX = 0 + UN VALOR = PONER UN VALOR EN EAX
+                genCod.cargarByte(0xF7); // IMUL EAX, EBX 
+                genCod.cargarByte(0xE8); // IMUL EAX, EBX
+                genCod.cargarByte(0x50); // PONEMOS EL VALOR EN LA PILA CON PUSH EAX
                 break;
             default:
                 indError.mostrarError(20, alex.getCadena());
