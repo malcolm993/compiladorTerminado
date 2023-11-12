@@ -256,6 +256,7 @@ public class AnalizadorSintactico {
                 if (alex.getSimbolo() == Terminal.ASIGNACION_DE_VARIABLE || alex.getSimbolo() == Terminal.IGUAL) {
                     intentoMaravilla();
                     expresion(base, desplazamiento);
+
                     genCod.cargarByte(0x58); //OBTENGO EL RESULTADO DE EXPRESION QUE ESTA EN LA PILA, SE LO MANDO A EAX
                     genCod.cargarByte(0x89); // MOV EDI+0000, EAX
                     genCod.cargarByte(0x87); // MOV EDI+0000, EAX
@@ -590,26 +591,43 @@ public class AnalizadorSintactico {
                 //System.out.println("Se codifico correctamente el halt");
                 intentoMaravilla();
                 break;
-                
+
             case SUCC:
+                //System.out.println("entro");
                 intentoMaravilla();
-                if (alex.getSimbolo() == Terminal.APERTURA_PARENTESIS){
-                    expresion(base, desplazamiento);
-                }else{
+                if (alex.getSimbolo() == Terminal.APERTURA_PARENTESIS) {
+                    intentoMaravilla();
+                } else {
                     indError.mostrarError(11, alex.getCadena());
+                }
+
+                if (alex.getSimbolo() == Terminal.IDENTIFICADOR) {
+                    indice = aSem.buscarBean(base + desplazamiento - 1, 0, alex.getCadena());
+                    IdentificadorBean succBean = aSem.obtenerBean(indice);
+                    if (indice == -1) {
+                        indError.mostrarError(24, alex.getCadena());
+                    } else if (succBean.getTipo() == Terminal.PROCEDURE) {
+                        indError.mostrarError(25, alex.getCadena());
+                    }
+                    
+                    expresion(base, desplazamiento);
+                    genCod.cargarByte(0x5B); // POP  EBX
+                    genCod.cargarByte(0xB8); // MOV EAX, ABCD..
+                    genCod.cargarInt(1);     // MOV EAX , ABCD..  CARGO VALOR 1 A EAX 
+                    genCod.cargarByte(0x01); // ADD EAX, EBX
+                    genCod.cargarByte(0xD8); // ADD EAX, EBX
+                    genCod.cargarByte(0x50); // PUSH EAX
+                    genCod.cargarByte(0x58); //OBTENGO EL RESULTADO DE EXPRESION QUE ESTA EN LA PILA, SE LO MANDO A EAX
+                    genCod.cargarByte(0x89); // MOV EDI+0000, EAX
+                    genCod.cargarByte(0x87); // MOV EDI+0000, EAX
+                    genCod.cargarInt(succBean.getValor());
                 }
                 if (alex.getSimbolo() == Terminal.CIERRE_PARENTESIS) {
                     intentoMaravilla();
                 } else {
                     indError.mostrarError(12, alex.getCadena());
                 }
-                genCod.cargarByte(0x5B);
-                genCod.cargarByte(0xB8);
-                genCod.cargarInt(1);
-                genCod.cargarByte(0x01);
-                genCod.cargarByte(0xD8);
-                
-                
+
                 break;
         }
     }
@@ -943,8 +961,7 @@ public class AnalizadorSintactico {
                 genCod.cargarByte(0xE8); // IMUL EAX, EBX
                 genCod.cargarByte(0x50); // PONEMOS EL VALOR EN LA PILA CON PUSH EAX
                 break;
-                
-                
+
             default:
                 indError.mostrarError(20, alex.getCadena());
         }

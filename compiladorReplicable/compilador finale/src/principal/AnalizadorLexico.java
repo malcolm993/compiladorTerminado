@@ -191,6 +191,7 @@ public class AnalizadorLexico {
         palabrasReservadas.add("not");
         palabrasReservadas.add("halt");
         palabrasReservadas.add("sqr");
+        palabrasReservadas.add("succ");
     }
 
     private boolean caracterEstaVacio() {
@@ -245,7 +246,7 @@ public class AnalizadorLexico {
             terminalAux = Terminal.HALT;
         } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(16))) {
             terminalAux = Terminal.SQR;
-        }else if (cadena.equalsIgnoreCase(palabrasReservadas.get(17))) {
+        } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(17))) {
             terminalAux = Terminal.SUCC;
         }
 
