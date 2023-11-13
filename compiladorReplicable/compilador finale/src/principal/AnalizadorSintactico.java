@@ -266,6 +266,7 @@ public class AnalizadorSintactico {
                 break;
             case CALL:
                 intentoMaravilla();
+                System.out.println("??");
                 if (alex.getSimbolo() == Terminal.IDENTIFICADOR) {
                     indice = aSem.buscarBean(base + desplazamiento - 1, 0, alex.getCadena());
 
@@ -589,6 +590,46 @@ public class AnalizadorSintactico {
                 genCod.cargarInt(posicionHalt);
                 //System.out.println("Se codifico correctamente el halt");
                 intentoMaravilla();
+                break;
+            case REPEAT:
+                intentoMaravilla();
+                expresion(base, desplazamiento);
+                if (alex.getSimbolo() != Terminal.TIMES) {
+                    indError.mostrarError(16, alex.getCadena());
+                }
+
+                genCod.cargarByte(0xB8); //COPIA EL SEGUNDO OPERANDO EN EL PRIMERO MOV EAX
+                genCod.cargarInt(0);// CARGO EL VALOR 0
+
+                int dondeEmpiezaTimes = genCod.getTopeMemoria();//begin
+                genCod.cargarByte(0x50); // PUSH EAX : MANDO EL VALOR 0 EN LA PILA
+
+                intentoMaravilla();
+                proposicion(base, desplazamiento);
+
+                genCod.cargarByte(0xB8); //COPIA EL SEGUNDO OPERANDO EN EL PRIMERO, MOV EAX
+                genCod.cargarInt(1);// CARGO EL VALOR 1, EAX PASA DE TENER VALOR 0 A 1
+
+                genCod.cargarByte(0x5B); //POP EBX QIE TIENE VALOR 0 A LA PRIMERA,VALOR TOPE DE PILA
+
+                genCod.cargarByte(0x01);// ADD EAX,EBX 
+                genCod.cargarByte(0xD8);// QUEDA EAX CON VALOR 1 
+                
+                genCod.cargarByte(0x5B);
+                
+                genCod.cargarByte(0x39);//comparacion primer operando con el segundo CMP EBX, EAX
+                genCod.cargarByte(0xC3);
+
+                genCod.cargarByte(0x93); // INTERCAMBIO DE VARIABLES PARA SUBIR EN EL ORDEN CORRESNPODIENTES LOS DATOS DE LA PILA
+                genCod.cargarByte(0x50);
+                genCod.cargarByte(0x93); // INTERCAMBIO DE VARIABLES PARA SUBIR EN EL ORDEN CORRESNPODIENTES LOS DATOS DE LA PILA
+
+                genCod.cargarByte(0x74);// salto condicional 
+                genCod.cargarByte(0x05);//cantidad bytes que salta
+
+                genCod.cargarByte(0xE9);
+                genCod.cargarInt(dondeEmpiezaTimes - (genCod.getTopeMemoria() + 4));
+
                 break;
         }
     }

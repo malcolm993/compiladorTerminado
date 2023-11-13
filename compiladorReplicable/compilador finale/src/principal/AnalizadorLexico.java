@@ -191,6 +191,8 @@ public class AnalizadorLexico {
         palabrasReservadas.add("not");
         palabrasReservadas.add("halt");
         palabrasReservadas.add("sqr");
+        palabrasReservadas.add("repeat");
+        palabrasReservadas.add("times");
     }
 
     private boolean caracterEstaVacio() {
@@ -245,6 +247,10 @@ public class AnalizadorLexico {
             terminalAux = Terminal.HALT;
         } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(16))) {
             terminalAux = Terminal.SQR;
+        } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(17))) {
+            terminalAux = Terminal.REPEAT;
+        } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(18))) {
+            terminalAux = Terminal.TIMES;
         }
 
         return terminalAux;
