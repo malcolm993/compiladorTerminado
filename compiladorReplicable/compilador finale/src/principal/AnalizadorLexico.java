@@ -191,6 +191,9 @@ public class AnalizadorLexico {
         palabrasReservadas.add("not");
         palabrasReservadas.add("halt");
         palabrasReservadas.add("sqr");
+        palabrasReservadas.add("for");
+        palabrasReservadas.add("to");
+
     }
 
     private boolean caracterEstaVacio() {

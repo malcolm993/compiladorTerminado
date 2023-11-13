@@ -39,6 +39,8 @@ public enum Terminal {
     WRITE,
     NOT,
     HALT,
-    SQR;
+    SQR,
+    FOR,
+    TO;
 
 }

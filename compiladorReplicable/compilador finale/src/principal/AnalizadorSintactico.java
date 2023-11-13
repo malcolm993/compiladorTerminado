@@ -18,7 +18,7 @@ public class AnalizadorSintactico {
     private AnalizadorSemantico aSem;
     private GeneradorDeCodigo genCod;
     private int cantidadDeVariables;
-
+    
     public AnalizadorSintactico(AnalizadorLexico alex, IndicadorError indError, AnalizadorSemantico aSem, GeneradorDeCodigo genCod) {
         this.alex = alex;
         this.indError = indError;
@@ -26,7 +26,7 @@ public class AnalizadorSintactico {
         this.genCod = genCod;
         cantidadDeVariables = 0;
     }
-
+    
     public void analizar() throws IOException {
         intentoMaravilla();
         programa();
@@ -36,7 +36,7 @@ public class AnalizadorSintactico {
             indError.mostrarError(1, alex.getCadena());
         }
     }
-
+    
     private void programa() throws IOException {
         genCod.cargarByte(0xBF); // MOV EDI, 00 00 00 00 
         genCod.cargarInt(0);       // MOV EDI, 00 00 00 00
@@ -49,7 +49,7 @@ public class AnalizadorSintactico {
             indError.mostrarError(2, alex.getCadena());
         }
     }
-
+    
     private void bloque(int base) throws IOException {
         genCod.cargarByte(0xE9); // E9 00 00 00 00
         genCod.cargarInt(0);       // E9 00 00 00 00 
@@ -57,29 +57,29 @@ public class AnalizadorSintactico {
         int desplazamiento = 0;
         int indice;
         if (alex.getSimbolo() == Terminal.CONST) {
-
+            
             IdentificadorBean beanConstante = new IdentificadorBean();
             beanConstante.setTipo(alex.getSimbolo());
             intentoMaravilla();
-
+            
             if (alex.getSimbolo() == Terminal.IDENTIFICADOR) {
                 beanConstante.setNombre(alex.getCadena());
                 intentoMaravilla();
             } else {
                 indError.mostrarError(3, alex.getCadena());
             }
-
+            
             if (alex.getSimbolo() == Terminal.IGUAL || alex.getSimbolo() == Terminal.ASIGNACION_DE_VARIABLE) {
                 intentoMaravilla();
             } else {
                 indError.mostrarError(4, alex.getCadena());
             }
-
+            
             if (alex.getSimbolo() == Terminal.OPERADOR_RESTA) {
                 intentoMaravilla();
                 if (alex.getSimbolo() == Terminal.NUMERO) {
                     beanConstante.setValor(Integer.parseInt(alex.getCadena()) * (-1));
-
+                    
                     indice = aSem.buscarBean(base + desplazamiento - 1, base, beanConstante.getNombre());
                     if (indice == -1) {
                         aSem.agregarBean(base + desplazamiento, beanConstante);
@@ -93,7 +93,7 @@ public class AnalizadorSintactico {
                 }
             } else if (alex.getSimbolo() == Terminal.NUMERO) {
                 beanConstante.setValor(Integer.parseInt(alex.getCadena()));
-
+                
                 indice = aSem.buscarBean(base + desplazamiento - 1, base, beanConstante.getNombre());
                 if (indice == -1) {
                     aSem.agregarBean(base + desplazamiento, beanConstante);
@@ -101,7 +101,7 @@ public class AnalizadorSintactico {
                 } else {
                     indError.mostrarError(23, alex.getCadena());
                 }
-
+                
                 intentoMaravilla();
             } else {
                 indError.mostrarError(5, alex.getCadena());
@@ -121,7 +121,7 @@ public class AnalizadorSintactico {
                 } else {
                     indError.mostrarError(4, alex.getCadena());
                 }
-
+                
                 if (alex.getSimbolo() == Terminal.OPERADOR_RESTA) {
                     intentoMaravilla();
                     if (alex.getSimbolo() == Terminal.NUMERO) {
@@ -191,7 +191,7 @@ public class AnalizadorSintactico {
                     } else {
                         indError.mostrarError(23, alex.getCadena());
                     }
-
+                    
                     intentoMaravilla();
                 } else {
                     indError.mostrarError(3, alex.getCadena());
@@ -240,19 +240,19 @@ public class AnalizadorSintactico {
         genCod.cargarIntEn(destinoBloque - origenBloque, origenBloque - 4);
         proposicion(base, desplazamiento);
     }
-
+    
     private void proposicion(int base, int desplazamiento) throws IOException {
         int indice;
         switch (alex.getSimbolo()) {
             case IDENTIFICADOR:
                 indice = aSem.buscarBean(base + desplazamiento - 1, 0, alex.getCadena());
-
+                
                 IdentificadorBean ident = aSem.obtenerBean(indice);
                 if (indice == -1) {
                     indError.mostrarError(24, alex.getCadena());
                 }
                 intentoMaravilla();
-
+                
                 if (alex.getSimbolo() == Terminal.ASIGNACION_DE_VARIABLE || alex.getSimbolo() == Terminal.IGUAL) {
                     intentoMaravilla();
                     expresion(base, desplazamiento);
@@ -268,16 +268,16 @@ public class AnalizadorSintactico {
                 intentoMaravilla();
                 if (alex.getSimbolo() == Terminal.IDENTIFICADOR) {
                     indice = aSem.buscarBean(base + desplazamiento - 1, 0, alex.getCadena());
-
+                    
                     if (indice == -1) {
                         indError.mostrarError(24, alex.getCadena());
                     }
-
+                    
                     IdentificadorBean beanProc = aSem.obtenerBean(indice);
                     if (beanProc.getTipo() != Terminal.PROCEDURE) {
                         indError.mostrarError(26, alex.getCadena());
                     }
-
+                    
                     int aux12 = beanProc.getValor() - (genCod.getTopeMemoria() + 5);
                     genCod.cargarByte(0xE8); // CALL EL PROCEDURE
                     genCod.cargarInt(aux12);   // CALL LA POSICION DEL PROCEDURE
@@ -309,7 +309,7 @@ public class AnalizadorSintactico {
                     condicion(base, desplazamiento);
                 }
                 int posicion = genCod.getTopeMemoria();
-
+                
                 if (alex.getSimbolo() == Terminal.THEN) {
                     intentoMaravilla();
                 } else {
@@ -317,7 +317,7 @@ public class AnalizadorSintactico {
                 }
                 proposicion(base, desplazamiento);
                 int destino = genCod.getTopeMemoria();
-
+                
                 genCod.cargarIntEn(destino - posicion, posicion - 4); // FIX UP
                 // CHE, VOLVE A DESPUES DEL E9 Y CAMBIALE LA POSICION DEL SALTO
                 //FIX UP A LA CONDICION, SI LA CONDICION SE CUMPLE, SE REALIZA EL THEN. SALTANDOSE EL SALTO PARA SALIR DEL IF
@@ -325,11 +325,11 @@ public class AnalizadorSintactico {
                 break;
             case WHILE:
                 intentoMaravilla();
-
+                
                 int destinoWhile = genCod.getTopeMemoria(); // POSICION ANTES DE LA CONDICION
 
                 condicion(base, desplazamiento);
-
+                
                 int posicionWhile = genCod.getTopeMemoria(); // TIENE EL E9 00 00 00 00
                 if (alex.getSimbolo() == Terminal.DO) {
                     intentoMaravilla();
@@ -362,7 +362,7 @@ public class AnalizadorSintactico {
                     } else if (readlnBean.getTipo() == Terminal.PROCEDURE) {
                         indError.mostrarError(25, alex.getCadena());
                     }
-
+                    
                     genCod.cargarByte(0xE8); // CALL 
                     int distanciaEntradaEntero = 1424 - (genCod.getTopeMemoria() + 4); // SE HACE EL CALCULO DE LA DISTANCIA A LA SUBRUTINA
                     genCod.cargarInt(distanciaEntradaEntero); // CALL SUBRUTINA
@@ -380,20 +380,20 @@ public class AnalizadorSintactico {
                     if (alex.getSimbolo() == Terminal.IDENTIFICADOR) {
                         indice = aSem.buscarBean(base + desplazamiento - 1, 0, alex.getCadena());
                         IdentificadorBean readlnWhileBean = aSem.obtenerBean(indice);
-
+                        
                         if (indice == -1) {
                             indError.mostrarError(24, alex.getCadena());
                         } else if (readlnWhileBean.getTipo() == Terminal.PROCEDURE) {
                             indError.mostrarError(25, alex.getCadena());
                         }
-
+                        
                         genCod.cargarByte(0xE8);
                         int distanciaEntradaEnteroWhile = 1424 - (genCod.getTopeMemoria() + 4);
                         genCod.cargarInt(distanciaEntradaEnteroWhile);
                         genCod.cargarByte(0x89);
                         genCod.cargarByte(0x87);
                         genCod.cargarInt(readlnWhileBean.getValor());
-
+                        
                         intentoMaravilla();
                     } else {
                         indError.mostrarError(3, alex.getCadena());
@@ -412,7 +412,7 @@ public class AnalizadorSintactico {
                     if (alex.getSimbolo() == Terminal.CADENA_LITERAL) {
                         int ubicacionCadena = genCod.descargarIntDe(204) + genCod.descargarIntDe(212)
                                 - genCod.getTAMANO_HEADER() + genCod.getTopeMemoria() + 15;
-
+                        
                         genCod.cargarByte(0xB8); //MOV EAX , XXXXX
                         genCod.cargarInt(ubicacionCadena);//UBICACION  
 
@@ -425,11 +425,11 @@ public class AnalizadorSintactico {
                         // 4. SE GENERAN LOS BYTES DE LA CADENA 
                         String cadena = alex.getCadena().substring(1, alex.getCadena().length() - 1);
                         int inicioCadena = genCod.getTopeMemoria();
-
+                        
                         for (char caracter : cadena.toCharArray()) {
                             genCod.cargarByte((byte) caracter);
                         }
-
+                        
                         genCod.cargarByte(0x00);
                         int finalCadena = genCod.getTopeMemoria();
 
@@ -437,7 +437,7 @@ public class AnalizadorSintactico {
                         intentoMaravilla();
                         int saltosParaHacer = finalCadena - inicioCadena;
                         genCod.cargarIntEn(saltosParaHacer, inicioCadena - 4);
-
+                        
                     } else {
                         expresion(base, desplazamiento);
                         genCod.cargarByte(0x58);
@@ -451,7 +451,7 @@ public class AnalizadorSintactico {
                         if (alex.getSimbolo() == Terminal.CADENA_LITERAL) {
                             int ubicacionCadena = genCod.descargarIntDe(204) + genCod.descargarIntDe(212)
                                     - genCod.getTAMANO_HEADER() + genCod.getTopeMemoria() + 15;
-
+                            
                             genCod.cargarByte(0xB8); //MOV EAX , XXXXX
                             genCod.cargarInt(ubicacionCadena);//UBICACION  
 
@@ -464,11 +464,11 @@ public class AnalizadorSintactico {
                             // 4. SE GENERAN LOS BYTES DE LA CADENA 
                             String cadena = alex.getCadena().substring(1, alex.getCadena().length() - 1);
                             int inicioCadena = genCod.getTopeMemoria();
-
+                            
                             for (char caracter : cadena.toCharArray()) {
                                 genCod.cargarByte((byte) caracter);
                             }
-
+                            
                             genCod.cargarByte(0x00);
                             int finalCadena = genCod.getTopeMemoria();
 
@@ -476,7 +476,7 @@ public class AnalizadorSintactico {
                             intentoMaravilla();
                             int saltosParaHacer = finalCadena - inicioCadena;
                             genCod.cargarIntEn(saltosParaHacer, inicioCadena - 4);
-
+                            
                         } else {
                             expresion(base, desplazamiento);
                             genCod.cargarByte(0x58); // POP EAX
@@ -517,11 +517,11 @@ public class AnalizadorSintactico {
                     // 4. SE GENERAN LOS BYTES DE LA CADENA 
                     String cadena = alex.getCadena().substring(1, alex.getCadena().length() - 1);
                     int inicioCadena = genCod.getTopeMemoria();
-
+                    
                     for (char caracter : cadena.toCharArray()) {
                         genCod.cargarByte((byte) caracter);
                     }
-
+                    
                     genCod.cargarByte(0x00);
                     int finalCadena = genCod.getTopeMemoria();
 
@@ -529,7 +529,7 @@ public class AnalizadorSintactico {
                     intentoMaravilla();
                     int saltosParaHacer = finalCadena - inicioCadena;
                     genCod.cargarIntEn(saltosParaHacer, inicioCadena - 4);
-
+                    
                 } else {
                     expresion(base, desplazamiento);
                     genCod.cargarByte(0x58); // POP EAX
@@ -537,7 +537,7 @@ public class AnalizadorSintactico {
                     genCod.cargarByte(0xE8);
                     genCod.cargarInt(mostrarEntero);//mostramos el valor por pantalla del entero ingresado
                 }
-
+                
                 while (alex.getSimbolo() == Terminal.COMA) {
                     intentoMaravilla();
                     if (alex.getSimbolo() == Terminal.CADENA_LITERAL) {
@@ -557,11 +557,11 @@ public class AnalizadorSintactico {
                         // 4. SE GENERAN LOS BYTES DE LA CADENA 
                         String cadena = alex.getCadena().substring(1, alex.getCadena().length() - 1);
                         int inicioCadena = genCod.getTopeMemoria();
-
+                        
                         for (char caracter : cadena.toCharArray()) {
                             genCod.cargarByte((byte) caracter);
                         }
-
+                        
                         genCod.cargarByte(0x00);
                         int finalCadena = genCod.getTopeMemoria();
 
@@ -590,9 +590,48 @@ public class AnalizadorSintactico {
                 //System.out.println("Se codifico correctamente el halt");
                 intentoMaravilla();
                 break;
+            
+            case FOR:
+                intentoMaravilla();
+                proposicion(base, desplazamiento);
+                intentoMaravilla();
+                if (alex.getSimbolo() == Terminal.TO) {
+                    expresion(base, desplazamiento);
+                } else {
+                    indError.mostrarError(16, alex.getCadena());
+                }
+                int inicioCiclo= genCod.getTopeMemoria();
+                
+                genCod.cargarByte(0xB8);
+                genCod.cargarInt(1);
+                
+                genCod.cargarByte(0x5B);
+                
+                genCod.cargarByte(0x58);
+                
+                genCod.cargarByte(0x29);
+                genCod.cargarByte(0xD8);
+                
+                genCod.cargarByte(0x50);
+                
+                genCod.cargarByte(0x5B);
+                
+                genCod.cargarByte(0x58);
+                
+                genCod.cargarByte(0x39);
+                genCod.cargarByte(0xC3);
+                
+                genCod.cargarByte(0x74);
+                genCod.cargarByte(0x05);
+                
+                
+                genCod.cargarByte(0xE9);
+                genCod.cargarByte(inicioCiclo-(genCod.getTopeMemoria()+4));
+                break;
+            
         }
     }
-
+    
     private void expresion(int base, int desplazamiento) throws IOException {
         boolean esPositivo = true;
         if (alex.getSimbolo() == Terminal.OPERADOR_SUMA) {
@@ -609,7 +648,7 @@ public class AnalizadorSintactico {
             genCod.cargarByte(0xD8); // NEG EAX
             genCod.cargarByte(0x50); // PUSH EAX
         }
-
+        
         while (alex.getSimbolo() == Terminal.OPERADOR_SUMA || alex.getSimbolo() == Terminal.OPERADOR_RESTA) {
             boolean operadorFlag = false;
             if (alex.getSimbolo() == Terminal.OPERADOR_SUMA) {
@@ -619,7 +658,7 @@ public class AnalizadorSintactico {
             }
             intentoMaravilla();
             termino(base, desplazamiento);
-
+            
             if (operadorFlag) {
                 genCod.cargarByte(0x58); // POP EAX
                 genCod.cargarByte(0x5B); // POP EBX
@@ -636,7 +675,7 @@ public class AnalizadorSintactico {
             }
         }
     }
-
+    
     private void condicion(int base, int desplazamiento) throws IOException {
         if (alex.getSimbolo() == Terminal.ODD) {
             intentoMaravilla();
@@ -719,7 +758,7 @@ public class AnalizadorSintactico {
             genCod.cargarInt(0);       // E9 00 00 00 00
         }
     }
-
+    
     private void condicionNOT(int base, int desplazamiento) throws IOException {
         if (alex.getSimbolo() == Terminal.APERTURA_PARENTESIS) {
             intentoMaravilla();
@@ -803,7 +842,7 @@ public class AnalizadorSintactico {
                 default:
                     indError.mostrarError(19, alex.getCadena());
             }
-
+            
             if (alex.getSimbolo() == Terminal.CIERRE_PARENTESIS) {
                 intentoMaravilla();
             } else {
@@ -813,13 +852,13 @@ public class AnalizadorSintactico {
             genCod.cargarInt(0);       // E9 00 00 00 00
         }
     }
-
+    
     private void termino(int base, int desplazamiento) throws IOException {
         factor(base, desplazamiento);
-
+        
         while (alex.getSimbolo() == Terminal.OPERADOR_MULTIPLICACION || alex.getSimbolo() == Terminal.OPERADOR_DIVISION) {
             boolean esMultiplicacion = true;
-
+            
             if (alex.getSimbolo() == Terminal.OPERADOR_MULTIPLICACION) {
                 esMultiplicacion = true;
             } else if (alex.getSimbolo() == Terminal.OPERADOR_DIVISION) {
@@ -844,7 +883,7 @@ public class AnalizadorSintactico {
             }
         }
     }
-
+    
     private void factor(int base, int desplazamiento) throws IOException {
         switch (alex.getSimbolo()) {
             case IDENTIFICADOR:
@@ -852,11 +891,11 @@ public class AnalizadorSintactico {
                 int indice = aSem.buscarBean(base + desplazamiento - 1, 0, alex.getCadena());
                 //System.out.println(alex.getCadena());
                 beanFactor = aSem.obtenerBean(indice);
-
+                
                 if (beanFactor == null) {
                     indError.mostrarError(24, alex.getCadena());
                 }
-
+                
                 if (beanFactor.getTipo().equals(Terminal.VAR)) {
                     // SI ES VAR HACERLO DE ESTA FORMA
                     genCod.cargarByte(0x8B); // MOV EAX
@@ -926,7 +965,7 @@ public class AnalizadorSintactico {
                 indError.mostrarError(20, alex.getCadena());
         }
     }
-
+    
     private void intentoMaravilla() throws IOException {
         do {
             alex.escanear();
