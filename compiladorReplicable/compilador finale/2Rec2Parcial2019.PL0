@@ -1,28 +1,26 @@
-const k1 = 2, K2 := -1;
-var n1, n2, lu, cont, cant;
-procedure lucas;
+const k1 = 0, K2 = -1;
+var n1, n2, pe, cont, cant;
+procedure pell;
 begin
-lu := n1 + n2;
-n1 = n2;
-n2 := lu
+pe := n1 + 2*n2;
+n1 := n2;
+n2 := pe
 end;
 begin
-write ('Cuantos terminos de la sucesion de Lucas desea ver [min 3]? ');
+write ('Cuantos numeros de Pell desea ver [min. 3]? ');
 readLn (cant);
-if not (cant >= 3) then
+while cant < 3 do
 begin
-writeln ('Cual parte de la pregunta no entendiste??? Minimo 3!!!');
-halt
+write ('Cuantos numeros de Pell desea ver [min. 3]? ');
+readLn (cant);
 end;
 write (k1, ' ', -k2, ' ');
 N1 := K1;
-n2 := -k2;
-cont := 2;
-while cont < cant do
+n2 := -K2;
+for cont := 2 to cant - 1 do
 begin
-call lucas;
-cont = cont + 1;
-write (lu, ' ')
+call pell;
+write (pe, ' ')
 end;
 writeln
 end.

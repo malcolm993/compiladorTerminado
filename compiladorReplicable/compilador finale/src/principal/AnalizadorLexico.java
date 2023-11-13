@@ -248,6 +248,10 @@ public class AnalizadorLexico {
             terminalAux = Terminal.HALT;
         } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(16))) {
             terminalAux = Terminal.SQR;
+        } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(17))) {
+            terminalAux = Terminal.FOR;
+        } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(18))) {
+            terminalAux = Terminal.TO;
         }
 
         return terminalAux;

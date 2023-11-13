@@ -15,7 +15,7 @@ public class IndicadorError {
     public void mostrarError(int codigo, String cadena) {
         switch (codigo) {
             case 0:
-                System.out.println("Tamo Cheto mal");
+                System.out.println("un EXITO");
                 break;
             case 1:
                 System.out.println("El simbolo " + cadena + " esta de mas.");
@@ -62,7 +62,7 @@ public class IndicadorError {
             /*case 15:
                 System.out.println("Se esperaba un NUMERO y se encontro: " + cadena);
                 break;*/
-            case 16:
+            case 27:
                 System.out.println("Se esperaba un TO y se encontro: " + cadena);
                 break;
             case 17:
@@ -95,6 +95,11 @@ public class IndicadorError {
             case 26:
                 System.out.println("El identificador '" + cadena + "' no es un PROCEDURE.");
                 break;
+            case 28:
+                System.out.println("Se esperaba un TO pero se encontro " + cadena);
+
+                break;
+
         }
         System.exit(0);
     }
