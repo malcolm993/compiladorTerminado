@@ -15,7 +15,7 @@ public class IndicadorError {
     public void mostrarError(int codigo, String cadena) {
         switch (codigo) {
             case 0:
-                System.out.println("Tamo Cheto mal");
+                System.out.println("compilacion con exito");
                 break;
             case 1:
                 System.out.println("El simbolo " + cadena + " esta de mas.");

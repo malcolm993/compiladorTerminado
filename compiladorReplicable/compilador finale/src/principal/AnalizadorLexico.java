@@ -122,6 +122,11 @@ public class AnalizadorLexico {
         } else if (caracter == '=') {
             simbolo = Terminal.IGUAL;
             leerCaracter();
+            concatenar();
+            if (caracter == '=') {
+                simbolo = Terminal.IGUAL;
+                leerCaracter();
+            }
         } else if (caracter == '.') {
             simbolo = Terminal.PUNTO;
             leerCaracter();
@@ -190,7 +195,7 @@ public class AnalizadorLexico {
         palabrasReservadas.add("write");
         palabrasReservadas.add("not");
         palabrasReservadas.add("halt");
-        palabrasReservadas.add("sqr");
+        palabrasReservadas.add("else");
     }
 
     private boolean caracterEstaVacio() {
@@ -243,10 +248,9 @@ public class AnalizadorLexico {
             terminalAux = Terminal.NOT;
         } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(15))) {
             terminalAux = Terminal.HALT;
-        } else if (cadena.equalsIgnoreCase(palabrasReservadas.get(16))) {
-            terminalAux = Terminal.SQR;
+        }else if (cadena.equalsIgnoreCase(palabrasReservadas.get(16))) {
+            terminalAux = Terminal.ELSE;
         }
-
         return terminalAux;
     }
 

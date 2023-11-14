@@ -294,6 +294,7 @@ public class AnalizadorSintactico {
                     intentoMaravilla();
                     proposicion(base, desplazamiento);
                 }
+
                 if (alex.getSimbolo() == Terminal.END) {
                     intentoMaravilla();
                 } else {
@@ -322,6 +323,17 @@ public class AnalizadorSintactico {
                 // CHE, VOLVE A DESPUES DEL E9 Y CAMBIALE LA POSICION DEL SALTO
                 //FIX UP A LA CONDICION, SI LA CONDICION SE CUMPLE, SE REALIZA EL THEN. SALTANDOSE EL SALTO PARA SALIR DEL IF
                 // CASO CONTRARIO, SI LA CONDICION NO SE CUMPLE SALTA AL FINAL DEL IF. ACÁ SE REALIZA EL FIX UP PARA DECIRLE A DONDE SALIR
+                
+                if (alex.getSimbolo() == Terminal.ELSE){
+                    
+                    // aca se le ingresa E9 valor 0;
+                    
+                    intentoMaravilla();
+                    proposicion(base, desplazamiento);
+                    
+                    
+                    //aca va fix up
+                }
                 break;
             case WHILE:
                 intentoMaravilla();
@@ -653,6 +665,7 @@ public class AnalizadorSintactico {
             expresion(base, desplazamiento);
             switch (alex.getSimbolo()) {
                 case IGUAL:
+                    
                     intentoMaravilla();
                     expresion(base, desplazamiento);
                     genCod.cargarByte(0x58); // POP EAX
@@ -890,38 +903,7 @@ public class AnalizadorSintactico {
                     indError.mostrarError(22, alex.getCadena());
                 }
                 break;
-            case SQR:
-                intentoMaravilla();
-                if (alex.getSimbolo() == Terminal.APERTURA_PARENTESIS) {
-                    intentoMaravilla();
-                } else {
-                    indError.mostrarError(11, alex.getCadena());
-                }
-                expresion(base, desplazamiento); // dejas en el tope de la pila el valor del registro EAX
 
-                if (alex.getSimbolo() == Terminal.CIERRE_PARENTESIS) {
-                    intentoMaravilla();
-                } else {
-                    indError.mostrarError(12, alex.getCadena());
-                }
-
-                // LEVANTAMOS EL VALOR DE LA PILA
-                // QUEREMOS UN NUMERO AL CUADRADO
-                // ESO SIGNIFICA N X N, 2X2
-                // ENTONCES QUEREMOS MULTIPLICAR EL MISMO VALOR POR EL MISMO VALOR
-                // PARA ELLO PODEMOS USAR IMUL QUE MULTIPLICA EAX POR EBX
-                // PARA ELLO NECESITAMOS TENER EL MISMO VALOR EN EAX Y EN EBX
-                //genCod.cargarByte(0x58); // POP EAX
-                //genCod.cargarByte(0x93); // XCHG EAX, EBX así pasamos el valor levantado de la pila y lo ponemos en ebx
-                genCod.cargarByte(0x5B); // POP EBX
-                genCod.cargarByte(0xB8); // YA CON EL VALOR EN EBX FORZAMOS A EAX A QUE SEA 0
-                genCod.cargarInt(0);       // B8 00 00 00 00 es MOV EAX, 00 00 00 00  
-                genCod.cargarByte(0x01); // 01 D8 SUMA EAX Y EBX Y LO PONE EN EL PRIMER OPERANDO 
-                genCod.cargarByte(0xD8); // ENTONCES EAX + EBX = 0 + UN VALOR = PONER UN VALOR EN EAX
-                genCod.cargarByte(0xF7); // IMUL EAX, EBX 
-                genCod.cargarByte(0xE8); // IMUL EAX, EBX
-                genCod.cargarByte(0x50); // PONEMOS EL VALOR EN LA PILA CON PUSH EAX
-                break;
             default:
                 indError.mostrarError(20, alex.getCadena());
         }
